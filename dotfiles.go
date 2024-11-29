@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -48,6 +49,19 @@ func copyFile(src, dst string) error {
 	_, err = io.Copy(dstFile, srcFile)
 	if err != nil {
 		return fmt.Errorf("error copying file contents: %w", err)
+	}
+
+	return nil
+}
+
+func addFile(localPath string) error {
+	// Get the file name from the path.
+	fileName := filepath.Base(localPath)
+	fileName = strings.Replace(fileName, "dot_", ".", 1)
+
+	// Copy the file to the repository.
+	if err := copyFile(localPath, fileName); err != nil {
+		return fmt.Errorf("error copying file: %w", err)
 	}
 
 	return nil

@@ -70,7 +70,7 @@ func (p *pushCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...interface{}) 
 			continue
 		}
 
-		slog.Info("Pushing file", slog.String("file", homeDotPath))
+		slog.Info("Pushing file", slog.String(loggingKeyFile, homeDotPath))
 
 		// Copy the file from the repository to the home directory.
 		if err := copyFile(repoDot, homeDotPath); err != nil {

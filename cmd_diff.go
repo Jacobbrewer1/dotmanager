@@ -63,6 +63,9 @@ func (d *diffCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...interface{}) 
 		if _, err := os.Stat(homeDotPath); os.IsNotExist(err) {
 			slog.Info("File not found in home directory", slog.String(loggingKeyFile, homeDotPath))
 			continue
+		} else if err != nil {
+			slog.Error("Error checking if file exists", slog.String(loggingKeyError, err.Error()))
+			return subcommands.ExitFailure
 		}
 
 		// Show the diff between the repository dotfile and the local dotfile.

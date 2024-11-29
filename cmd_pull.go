@@ -69,7 +69,7 @@ func (p *pullCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...interface{}) 
 			continue
 		}
 
-		slog.Info("Copying file", slog.String("file", homeDotName))
+		slog.Info("Copying file", slog.String(loggingKeyFile, homeDotName))
 
 		// Copy the contents of the home dotfile to the repository dotfile.
 		if err := copyFile(homeDotPath, repoDot); err != nil {

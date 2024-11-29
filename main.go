@@ -20,6 +20,7 @@ func main() {
 	subcommands.Register(new(diffCmd), "")
 	subcommands.Register(new(pullCmd), "")
 	subcommands.Register(new(pushCmd), "")
+	subcommands.Register(new(addCmd), "")
 
 	flag.Parse()
 
