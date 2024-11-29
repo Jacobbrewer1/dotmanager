@@ -13,8 +13,8 @@ func isGitRepo() bool {
 	return !os.IsNotExist(err)
 }
 
-func getDiff(repoDot, homeDotPath string) (string, error) {
-	repoContent, err := os.Open(repoDot)
+func getDiff(repoDotPath, homeDotPath string) (string, error) {
+	repoContent, err := os.Open(repoDotPath)
 	if err != nil {
 		return "", fmt.Errorf("error reading repository dotfile: %w", err)
 	}
@@ -35,9 +35,19 @@ func getDiff(repoDot, homeDotPath string) (string, error) {
 	}()
 
 	diff := difflib.UnifiedDiff{
-		FromFile: repoDot,
-		ToFile:   homeDotPath,
+		A: difflib.SplitLines(readFile(repoContent)),
+		B: difflib.SplitLines(readFile(homeContent)),
 	}
 
 	return difflib.GetUnifiedDiffString(diff)
+}
+
+func readFile(f *os.File) string {
+	content, err := os.ReadFile(f.Name())
+	if err != nil {
+		slog.Warn("Error reading file", slog.String(loggingKeyError, err.Error()))
+		return ""
+	}
+
+	return string(content)
 }

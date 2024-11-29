@@ -77,7 +77,6 @@ func (d *diffCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...interface{}) 
 		}
 
 		if diff == "" {
-			slog.Info("No diff found", slog.String(loggingKeyFile, homeDotPath))
 			continue
 		}
 
