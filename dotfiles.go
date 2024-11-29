@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 )
@@ -21,4 +22,33 @@ func getRepositoryDotFiles() ([]string, error) {
 	}
 
 	return dotFiles, nil
+}
+
+func copyFile(src, dst string) error {
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("error opening source file: %w", err)
+	}
+	defer func() {
+		if err := srcFile.Close(); err != nil {
+			fmt.Printf("Error closing source file: %s\n", err)
+		}
+	}()
+
+	dstFile, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("error creating destination file: %w", err)
+	}
+	defer func() {
+		if err := dstFile.Close(); err != nil {
+			fmt.Printf("Error closing destination file: %s\n", err)
+		}
+	}()
+
+	_, err = io.Copy(dstFile, srcFile)
+	if err != nil {
+		return fmt.Errorf("error copying file contents: %w", err)
+	}
+
+	return nil
 }

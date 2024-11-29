@@ -18,6 +18,7 @@ func main() {
 
 	subcommands.Register(new(versionCmd), "")
 	subcommands.Register(new(diffCmd), "")
+	subcommands.Register(new(pullCmd), "")
 
 	flag.Parse()
 
