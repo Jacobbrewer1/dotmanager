@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 
+	"github.com/fatih/color"
 	"github.com/pmezard/go-difflib/difflib"
 )
 
@@ -35,11 +37,29 @@ func getDiff(repoDotPath, homeDotPath string) (string, error) {
 	}()
 
 	diff := difflib.UnifiedDiff{
-		A: difflib.SplitLines(readFile(repoContent)),
-		B: difflib.SplitLines(readFile(homeContent)),
+		A:       difflib.SplitLines(readFile(repoContent)),
+		B:       difflib.SplitLines(readFile(homeContent)),
+		Context: 3,
 	}
 
-	return difflib.GetUnifiedDiffString(diff)
+	diffStr, err := difflib.GetUnifiedDiffString(diff)
+	if err != nil {
+		return "", fmt.Errorf("error creating diff: %w", err)
+	}
+
+	return colorizeDiff(diffStr), nil
+}
+
+func colorizeDiff(diff string) string {
+	lines := strings.Split(diff, "\n")
+	for i, line := range lines {
+		if strings.HasPrefix(line, "+") {
+			lines[i] = color.GreenString(line)
+		} else if strings.HasPrefix(line, "-") {
+			lines[i] = color.RedString(line)
+		}
+	}
+	return strings.Join(lines, "\n")
 }
 
 func readFile(f *os.File) string {

@@ -83,6 +83,7 @@ func (d *diffCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...interface{}) 
 			continue
 		}
 
+		fmt.Printf("\n")
 		fmt.Printf("Diff for %s:\n%s\n", homeDotPath, diff)
 	}
 
