@@ -18,12 +18,12 @@ func (p *pushCmd) Name() string {
 }
 
 func (p *pushCmd) Synopsis() string {
-	return "Push the local dotfiles into the repository"
+	return "Push the repository dotfiles into the home directory."
 }
 
 func (p *pushCmd) Usage() string {
 	return `push:
-  Push the repository dotfiles into the local directory.
+  Push the repository dotfiles into the home directory.
 `
 }
 
