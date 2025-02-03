@@ -41,11 +41,11 @@ jobs:
           go-version: ${{ vars.GO_VERSION }}
           cache-dependency-path: "**/*.sum"
 
-      - name: Build binaries
-        run: |
-          GOOS=linux GOARCH=amd64 go build -o bin/app-linux-amd64 .
-          GOOS=darwin GOARCH=amd64 go build -o bin/app-darwin-amd64 .
-          GOOS=windows GOARCH=amd64 go build -o bin/app-windows-amd64.exe .
+      - name: Run Mage
+        uses: magefile/mage-action@v3
+        with:
+          version: latest
+          args: release
 
       - name: Create Changelog
         run: |
