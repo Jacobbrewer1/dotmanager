@@ -26,6 +26,8 @@ func getRepositoryDotFiles() ([]string, error) {
 }
 
 func copyFile(src, dst string) error {
+	fmt.Println("Copying", src, "to", dst)
+
 	srcFile, err := os.Open(src)
 	if err != nil {
 		return fmt.Errorf("error opening source file: %w", err)
@@ -55,9 +57,8 @@ func copyFile(src, dst string) error {
 }
 
 func addFile(localPath string) error {
-	// Get the file name from the path.
-	fileName := filepath.Base(localPath)
-	fileName = strings.Replace(fileName, "dot_", ".", 1)
+	_, file := filepath.Split(localPath)
+	fileName := strings.Replace(file, ".", "dot_", 1)
 
 	// Copy the file to the repository.
 	if err := copyFile(localPath, fileName); err != nil {
