@@ -8,6 +8,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/fatih/color v1.18.0
 	github.com/google/subcommands v1.2.0
+	github.com/magefile/mage v1.15.0
 	github.com/pmezard/go-difflib v1.0.0
 )
 
