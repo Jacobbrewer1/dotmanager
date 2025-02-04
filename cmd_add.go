@@ -67,7 +67,8 @@ func (a *addCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...interface{}) s
 		availableFiles = append(availableFiles, file.Name())
 	}
 
-	selector := newFileSelector(availableFiles)
+	const title = "Select a file to add to start tracking"
+	selector := newFileSelector(title, availableFiles)
 	choice, err := selector.Exec()
 	if err != nil {
 		slog.Error("Error selecting file", slog.String(loggingKeyError, err.Error()))
