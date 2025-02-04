@@ -11,6 +11,7 @@ import (
 )
 
 type fileSelector struct {
+	title   string
 	choices []string
 
 	cursor int
@@ -52,7 +53,7 @@ func (m *fileSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *fileSelector) View() string {
 	s := strings.Builder{}
-	s.WriteString("What kind of Bubble Tea would you like to order?\n\n")
+	s.WriteString(m.title + "\n\n")
 
 	for i := 0; i < len(m.choices); i++ {
 		if m.cursor == i {
@@ -76,6 +77,9 @@ func (m *fileSelector) Exec() (string, error) {
 	return m.choice, nil
 }
 
-func newFileSelector(files []string) fileSelector {
-	return fileSelector{choices: files}
+func newFileSelector(title string, files []string) fileSelector {
+	return fileSelector{
+		title:   title,
+		choices: files,
+	}
 }
