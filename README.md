@@ -48,3 +48,11 @@ dotmanager push
 ```
 
 This will then update all the tracked files in your local machine with the latest changes from the repository.
+
+### Version
+
+To check the version of Dot Manager, use the `version` command:
+
+```bash
+dotmanager version
+```
