@@ -29,7 +29,7 @@ func (p *pullCmd) Usage() string {
 
 func (p *pullCmd) SetFlags(f *flag.FlagSet) {}
 
-func (p *pullCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
+func (p *pullCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...any) subcommands.ExitStatus {
 	// Get the dotfiles in the local directory that have the `dot_` prefix.
 	// We are assuming that the user is running this command from the root of their repository.
 

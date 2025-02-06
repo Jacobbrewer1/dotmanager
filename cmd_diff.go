@@ -30,7 +30,7 @@ func (d *diffCmd) Usage() string {
 
 func (d *diffCmd) SetFlags(f *flag.FlagSet) {}
 
-func (d *diffCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
+func (d *diffCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...any) subcommands.ExitStatus {
 	// Get the dotfiles in the local directory that have the `dot_` prefix.
 	// We are assuming that the user is running this command from the root of their repository.
 

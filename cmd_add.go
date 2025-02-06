@@ -29,7 +29,7 @@ func (a *addCmd) Usage() string {
 
 func (a *addCmd) SetFlags(f *flag.FlagSet) {}
 
-func (a *addCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
+func (a *addCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...any) subcommands.ExitStatus {
 	// Get the dotfiles in the local directory that have the `dot_` prefix.
 	// We are assuming that the user is running this command from the root of their repository.
 
@@ -56,15 +56,16 @@ func (a *addCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...interface{}) s
 
 	availableFiles := make([]string, 0)
 	for _, file := range files {
-		if file.IsDir() {
+		switch {
+		case file.IsDir():
 			continue
-		} else if !strings.HasPrefix(file.Name(), ".") {
+		case !strings.HasPrefix(file.Name(), "."):
 			continue
-		} else if strings.HasSuffix(file.Name(), ".tmp") {
+		case strings.HasSuffix(file.Name(), ".tmp"):
 			continue
+		default:
+			availableFiles = append(availableFiles, file.Name())
 		}
-
-		availableFiles = append(availableFiles, file.Name())
 	}
 
 	const title = "Select a file to add to start tracking"
