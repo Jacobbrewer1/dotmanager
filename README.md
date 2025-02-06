@@ -15,4 +15,36 @@ go install github.com/jacobbrewer1/dotmanager@latest
 
 ## Usage
 
-TODO: Add usage instructions
+### Add
+
+To add a dotfile to the repository, use the `add` command:
+
+```bash
+dotmanager add
+```
+
+This will then direct you to select the file you would like to add through a TUI.
+
+### Remove
+
+To stop tracking a dotfile, simply delete it from the repository.
+
+### Pull
+
+To pull the latest changes from you local machine into the repository, use the `pull` command:
+
+```bash
+dotmanager pull
+```
+
+This will then update all the tracked files in the repository with the latest changes from your local machine.
+
+### Push
+
+To push the latest changes from the repository to your local machine, use the `push` command:
+
+```bash
+dotmanager push
+```
+
+This will then update all the tracked files in your local machine with the latest changes from the repository.
