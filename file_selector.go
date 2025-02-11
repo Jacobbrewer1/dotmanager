@@ -54,7 +54,7 @@ func (m *fileSelector) View() string {
 	s := strings.Builder{}
 	s.WriteString(m.title + "\n\n")
 
-	for i := 0; i < len(m.choices); i++ {
+	for i := range len(m.choices) {
 		if m.cursor == i {
 			s.WriteString("(•) ")
 		} else {
