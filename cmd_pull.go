@@ -72,7 +72,7 @@ func (p *pullCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...any) subcomma
 		slog.Info("Copying file", slog.String(loggingKeyFile, homeDotName))
 
 		// Copy the contents of the home dotfile to the repository dotfile.
-		if err := copyFile(homeDotPath, repoDot); err != nil {
+		if err := copyFile(homeDotPath, repoDot); err != nil { // nolint:revive // This is valid and traditional error handling
 			slog.Error("Error copying file", slog.String(loggingKeyError, err.Error()))
 			return subcommands.ExitFailure
 		}
