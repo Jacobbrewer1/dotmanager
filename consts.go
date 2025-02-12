@@ -1,6 +1,7 @@
 package main
 
 const (
-	loggingKeyError = "error"
-	loggingKeyFile  = "file"
+	loggingKeyError  = "error"
+	loggingKeyFile   = "file"
+	loggingKeySignal = "signal"
 )
