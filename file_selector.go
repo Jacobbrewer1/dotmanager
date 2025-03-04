@@ -27,18 +27,15 @@ func (m *fileSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q", "esc":
 			return m, tea.Quit
-
 		case "enter":
 			// Send the choice on the channel and exit.
 			m.choice = m.choices[m.cursor]
 			return m, tea.Quit
-
 		case "down", "j":
 			m.cursor++
 			if m.cursor >= len(m.choices) {
 				m.cursor = 0
 			}
-
 		case "up", "k":
 			m.cursor--
 			if m.cursor < 0 {
@@ -46,7 +43,6 @@ func (m *fileSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	}
-
 	return m, nil
 }
 
@@ -55,16 +51,16 @@ func (m *fileSelector) View() string {
 	s.WriteString(m.title + "\n\n")
 
 	for i := range len(m.choices) {
+		str := "( ) "
 		if m.cursor == i {
-			s.WriteString("(•) ")
-		} else {
-			s.WriteString("( ) ")
+			str = "(•) "
 		}
+		s.WriteString(str)
 		s.WriteString(m.choices[i])
 		s.WriteString("\n")
 	}
-	s.WriteString("\n(press q to quit)\n")
 
+	s.WriteString("\n(press q to quit)\n")
 	return s.String()
 }
 

@@ -16,25 +16,15 @@ func isGitRepo() bool {
 }
 
 func getDiff(repoDotPath, homeDotPath string) (string, error) {
-	repoContent, err := os.Open(repoDotPath)
+	repoContent, err := os.OpenFile(repoDotPath, os.O_RDONLY, 0o400)
 	if err != nil {
-		return "", fmt.Errorf("error reading repository dotfile: %w", err)
+		return "", fmt.Errorf("error opening file: %w", err)
 	}
-	defer func() {
-		if err := repoContent.Close(); err != nil {
-			slog.Warn("Error closing repository dotfile", slog.String(loggingKeyError, err.Error()))
-		}
-	}()
 
-	homeContent, err := os.Open(homeDotPath)
+	homeContent, err := os.OpenFile(homeDotPath, os.O_RDONLY, 0o400)
 	if err != nil {
-		return "", fmt.Errorf("error reading home dotfile: %w", err)
+		return "", fmt.Errorf("error opening file: %w", err)
 	}
-	defer func() {
-		if err := homeContent.Close(); err != nil {
-			slog.Warn("Error closing home dotfile", slog.String(loggingKeyError, err.Error()))
-		}
-	}()
 
 	diff := difflib.UnifiedDiff{
 		A:       difflib.SplitLines(readFile(repoContent)),
