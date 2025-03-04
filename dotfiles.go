@@ -28,25 +28,15 @@ func getRepositoryDotFiles() ([]string, error) {
 func copyFile(src, dst string) error {
 	fmt.Println("Copying", src, "to", dst)
 
-	srcFile, err := os.Open(src)
+	srcFile, err := os.OpenFile(src, os.O_RDONLY, 0o400)
 	if err != nil {
 		return fmt.Errorf("error opening source file: %w", err)
 	}
-	defer func() {
-		if err := srcFile.Close(); err != nil {
-			fmt.Printf("Error closing source file: %s\n", err)
-		}
-	}()
 
-	dstFile, err := os.Create(dst)
+	dstFile, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY, 0o500)
 	if err != nil {
-		return fmt.Errorf("error creating destination file: %w", err)
+		return fmt.Errorf("error opening destination file: %w", err)
 	}
-	defer func() {
-		if err := dstFile.Close(); err != nil {
-			fmt.Printf("Error closing destination file: %s\n", err)
-		}
-	}()
 
 	_, err = io.Copy(dstFile, srcFile)
 	if err != nil {
