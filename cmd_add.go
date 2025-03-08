@@ -70,7 +70,7 @@ func (a *addCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...any) subcomman
 
 	choices, err := getFileFromUser(availableFiles)
 	if err != nil {
-		slog.Error("Error getting file from user", slog.String(loggingKeyError, err.Error()))
+		slog.Error("Error getting files from user", slog.String(loggingKeyError, err.Error()))
 		return subcommands.ExitFailure
 	}
 
