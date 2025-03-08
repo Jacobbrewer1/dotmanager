@@ -68,37 +68,37 @@ func (a *addCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...any) subcomman
 		}
 	}
 
-	const title = "Select a file to add to start tracking"
-	selector := newFileSelector(title, availableFiles)
-	choice, err := selector.Exec()
+	choices, err := getFileFromUser(availableFiles)
 	if err != nil {
-		slog.Error("Error selecting file", slog.String(loggingKeyError, err.Error()))
+		slog.Error("Error getting files from user", slog.String(loggingKeyError, err.Error()))
 		return subcommands.ExitFailure
 	}
 
-	// See if the file is already being tracked.
-	// If it is, return an error.
-	if stat, err := os.Stat(strings.Replace(choice, ".", "dot_", 1)); !os.IsNotExist(err) {
-		slog.Error("The file is already being tracked", slog.String(loggingKeyFile, choice))
-		return subcommands.ExitFailure
-	} else if err != nil && !os.IsNotExist(err) {
-		slog.Error("Error checking if the file is already being tracked", slog.String(loggingKeyError, err.Error()))
-		return subcommands.ExitFailure
-	} else if stat != nil && stat.Name() != "" {
-		slog.Error("The file is already being tracked", slog.String(loggingKeyFile, choice))
-		return subcommands.ExitFailure
+	for _, choice := range choices {
+		// See if the file is already being tracked.
+		// If it is, return an error.
+		if stat, err := os.Stat(strings.Replace(choice, ".", "dot_", 1)); !os.IsNotExist(err) {
+			slog.Error("The file is already being tracked", slog.String(loggingKeyFile, choice))
+			return subcommands.ExitFailure
+		} else if err != nil && !os.IsNotExist(err) {
+			slog.Error("Error checking if the file is already being tracked", slog.String(loggingKeyError, err.Error()))
+			return subcommands.ExitFailure
+		} else if stat != nil && stat.Name() != "" {
+			slog.Error("The file is already being tracked", slog.String(loggingKeyFile, choice))
+			return subcommands.ExitFailure
+		}
+
+		// Get the absolute path of the file in the home directory.
+		homeDotPath := filepath.Join(homeDir, choice)
+
+		// Add the file to the repository.
+		if err := addFile(homeDotPath); err != nil {
+			slog.Error("Error adding file to the repository", slog.String(loggingKeyError, err.Error()))
+			return subcommands.ExitFailure
+		}
+
+		slog.Info("File added to the repository", slog.String(loggingKeyFile, homeDotPath))
 	}
-
-	// Get the absolute path of the file in the home directory.
-	homeDotPath := filepath.Join(homeDir, choice)
-
-	// Add the file to the repository.
-	if err := addFile(homeDotPath); err != nil {
-		slog.Error("Error adding file to the repository", slog.String(loggingKeyError, err.Error()))
-		return subcommands.ExitFailure
-	}
-
-	slog.Info("File added to the repository", slog.String(loggingKeyFile, homeDotPath))
 
 	return subcommands.ExitSuccess
 }
