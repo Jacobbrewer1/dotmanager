@@ -15,6 +15,11 @@ on:
           - 'patch'
           - 'minor'
           - 'major'
+      snapshot:
+        description: 'Create a snapshot (pre-release) instead of a full release'
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: 'create-release'
@@ -41,50 +46,49 @@ jobs:
           go-version: ${{ vars.GO_VERSION }}
           cache-dependency-path: "**/*.sum"
 
-      - name: Run Mage
-        uses: magefile/mage-action@v3
-        with:
-          version: latest
-          args: release
-
-      - name: Create Changelog
+      - name: Create Tag
+        id: tag
         run: |
-          wget "https://github.com/clog-tool/clog-cli/releases/download/v0.9.3/clog-v0.9.3-x86_64-unknown-linux-gnu.tar.gz"
-          tar xvzf clog-v0.9.3-x86_64-unknown-linux-gnu.tar.gz
-          ./clog -c ./.clog.toml --${{ github.event.inputs.version }}
+          set -euo pipefail
+          TYPE='${{ github.event.inputs.version }}'
+          # Find latest tag matching v* (semantic version) or default to v0.0.0
+          LATEST_TAG=$(git tag --list 'v*' --sort=-version:refname | head -n1 || true)
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+          fi
+          echo "Latest tag: $LATEST_TAG"
+          VERSION=${LATEST_TAG#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          case "$TYPE" in
+            major)
+              MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
+            minor)
+              MINOR=$((MINOR+1)); PATCH=0 ;;
+            patch)
+              PATCH=$((PATCH+1)) ;;
+            *) echo "Invalid version bump type: $TYPE" >&2; exit 1 ;;
+          esac
+          NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "New tag: $NEW_TAG"
+          # Create annotated tag and push
+          git tag -a "$NEW_TAG" -m "Release $NEW_TAG"
+          git push origin "$NEW_TAG"
+          echo "tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Copy Changelog to Environment
+      - name: Generate Release Args
+        id: release-args
         run: |
-          echo 'CHANGELOG<<EOF' >> $GITHUB_ENV
-          cat changelog.md >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
+          args=""
+          if [ "${{ github.event.inputs.snapshot }}" = "true" ]; then 
+            args="--snapshot"
+          fi
+          echo "args=$args" >> "$GITHUB_OUTPUT"
 
-      - name: Get the new version
-        id: get_version
-        run: |
-          # Get the current version through the changelog file
-          version=$(cat changelog.md | grep "###" | head -n 1 | cut -d ' ' -f 2)
-          echo "VERSION=$version" >> $GITHUB_ENV
-
-      - name: Create tag
-        uses: actions/github-script@v8
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
         with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ env.VERSION }}',
-              sha: context.sha
-            })
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: ${{ env.VERSION }}
-          body: ${{ env.CHANGELOG }}
-          tag_name: ${{ env.VERSION }}
-          draft: false
-          prerelease: false
-          generate_release_notes: false
-          make_latest: true
-          files: "bin/*"
+          distribution: goreleaser
+          version: "~> v2"
+          args: release ${{ steps.release-args.outputs.args }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

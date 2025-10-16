@@ -16,11 +16,14 @@ linters:
     - testifylint
     - thelper
     - tparallel
+    - importas
   settings:
     goconst:
       ignore-calls: true
     gocritic:
       enable-all: true
+      disabled-checks:
+        - unnamedResult
     iface:
       enable:
         - identical
@@ -80,9 +83,9 @@ linters:
           exclude:
             - ""
     sloglint:
-      attr-only: true
+      attr-only: false
       static-msg: true
-      no-raw-keys: true
+      no-raw-keys: false
       key-naming-case: snake
       forbidden-keys:
         - time
@@ -108,6 +111,9 @@ linters:
       - linters:
           - goconst
         path: (.+)_test\.go
+      - linters:
+          - unused
+        path: .*
     paths:
       - third_party$
       - builtin$
@@ -115,7 +121,16 @@ linters:
 formatters:
   enable:
     - gofmt
+    - gci
   settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - blank
+        - dot
+        - prefix(github.com/jacobbrewer1)
+      custom-order: true
     gofmt:
       simplify: false
       rewrite-rules:

@@ -10,7 +10,7 @@ directory by syncing them with a git repository.
 To install Dot Manager, clone the repository and run the install script:
 
 ```bash
-go install github.com/jacobbrewer1/dotmanager@latest
+go install github.com/jacobbrewer1/dotmanager/cmd@latest
 ```
 
 ## Usage
