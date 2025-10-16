@@ -17,7 +17,7 @@ before:
 
 builds:
   - id: dotmanager
-    main: ./cmd/dotmanager
+    main: ./cmd
     binary: dotmanager
     ldflags:
       - -X main.commit={{.Commit}}

@@ -15,6 +15,11 @@ on:
           - 'patch'
           - 'minor'
           - 'major'
+      snapshot:
+        description: 'Create a snapshot (pre-release) instead of a full release'
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: 'create-release'
@@ -43,71 +48,46 @@ jobs:
 
       - name: Create Tag
         id: tag
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { execSync } = require('child_process');
-            
-            // Get the latest tag
-            let latestTag;
-            try {
-              latestTag = execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim();
-            } catch (error) {
-              // If no tags exist, start with v0.0.0
-              latestTag = 'v0.0.0';
-            }
-            
-            console.log(`Latest tag: ${latestTag}`);
-            
-            // Parse version numbers (remove 'v' prefix)
-            const version = latestTag.replace(/^v/, '');
-            const [major, minor, patch] = version.split('.').map(Number);
-            
-            // Determine new version based on input
-            const releaseType = '${{ github.event.inputs.version }}';
-            let newMajor = major;
-            let newMinor = minor;
-            let newPatch = patch;
-            
-            switch (releaseType) {
-              case 'major':
-                newMajor += 1;
-                newMinor = 0;
-                newPatch = 0;
-                break;
-              case 'minor':
-                newMinor += 1;
-                newPatch = 0;
-                break;
-              case 'patch':
-                newPatch += 1;
-                break;
-              default:
-                throw new Error(`Invalid release type: ${releaseType}`);
-            }
-            
-            const newTag = `v${newMajor}.${newMinor}.${newPatch}`;
-            console.log(`Creating new tag: ${newTag}`);
-            
-            // Create and push the new tag
-            execSync(`git tag ${newTag}`, { encoding: 'utf8' });
-            execSync(`git push origin ${newTag}`, { encoding: 'utf8' });
-            
-            // Set output for use in other steps
-            core.setOutput('tag', newTag);
-            core.setOutput('version', `${newMajor}.${newMinor}.${newPatch}`);
-            
-            return newTag;
+        run: |
+          set -euo pipefail
+          TYPE='${{ github.event.inputs.version }}'
+          # Find latest tag matching v* (semantic version) or default to v0.0.0
+          LATEST_TAG=$(git tag --list 'v*' --sort=-version:refname | head -n1 || true)
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+          fi
+          echo "Latest tag: $LATEST_TAG"
+          VERSION=${LATEST_TAG#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          case "$TYPE" in
+            major)
+              MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
+            minor)
+              MINOR=$((MINOR+1)); PATCH=0 ;;
+            patch)
+              PATCH=$((PATCH+1)) ;;
+            *) echo "Invalid version bump type: $TYPE" >&2; exit 1 ;;
+          esac
+          NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "New tag: $NEW_TAG"
+          # Create annotated tag and push
+          git tag -a "$NEW_TAG" -m "Release $NEW_TAG"
+          git push origin "$NEW_TAG"
+          echo "tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Generate Release Args
+        id: release-args
+        run: |
+          args=""
+          if [ "${{ github.event.inputs.snapshot }}" = "true" ]; then 
+            args="--snapshot"
+          fi
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
-          # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
-          # 'latest', 'nightly', or a semver
           version: "~> v2"
-          args: release --clean
+          args: release ${{ steps.release-args.outputs.args }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Your GoReleaser Pro key, if you are using the 'goreleaser-pro' distribution
-          # GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
