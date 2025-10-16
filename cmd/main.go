@@ -9,6 +9,7 @@ import (
 
 	"github.com/jacobbrewer1/dotmanager/cmd/add"
 	"github.com/jacobbrewer1/dotmanager/cmd/diff"
+	"github.com/jacobbrewer1/dotmanager/cmd/push"
 	"github.com/jacobbrewer1/dotmanager/pkg/utils"
 )
 
@@ -29,6 +30,24 @@ func main() {
 				Usage: "Diff your local dotfiles with the ones in the repository",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					return diff.PrintDiff(
+						ctx,
+					)
+				},
+			},
+			{
+				Name:  "push",
+				Usage: "Push changes from your local dotfiles to the repository",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					return push.Files(
+						ctx,
+					)
+				},
+			},
+			{
+				Name:  "pull",
+				Usage: "Pull changes from the repository to your local dotfiles",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					return push.Files(
 						ctx,
 					)
 				},
