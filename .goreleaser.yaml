@@ -35,3 +35,62 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+
+release:
+  # Whether to remove an artifact that already exists.
+  #
+  # Available only for GitHub.
+  # This might be a bit expensive (rate-limiting speaking), so it is only done
+  # when the upload of an artifact fails with a 422 (which means it already
+  # exists in the release).
+  # We then grab the list of artifacts from the release, and delete the file
+  # that matches the one we're trying to upload.
+  # GoReleaser will then retry its upload.
+  replace_existing_artifacts: true
+
+  # Useful if you want to delay the creation of the tag in the remote.
+  # You can create the tag locally, but not push it, and run GoReleaser.
+  # It'll then set the `target_commitish` portion of the GitHub release to the
+  # value of this field.
+  # Only works on GitHub.
+  #
+  # Default: ''.
+  # Templates: allowed.
+  target_commitish: "{{ .Commit }}"
+
+  # This allows to change which tag GitHub will create.
+  # Usually you'll use this together with `target_commitish`, or if you want to
+  # publish a binary from a monorepo into a public repository somewhere, without
+  # the tag prefix.
+  #
+  # Note: if you change this, you might want to change 'url_template' in the
+  # subsequent publishers and announcers.
+  #
+  # This feature is only available in GoReleaser Pro.
+  # Default: '{{ .PrefixedCurrentTag }}'.
+  # Templates: allowed.
+  tag: "{{ .CurrentTag }}"
+
+  # If set to auto, will mark the release as not ready for production
+  # in case there is an indicator for this in the tag e.g. v1.0.0-rc1
+  # If set to true, will mark the release as not ready for production.
+  # Default: false.
+  prerelease: auto
+
+  make_latest: true
+
+  # What to do with the release notes in case there the release already exists.
+  #
+  # Valid options are:
+  # - `keep-existing`: keep the existing notes
+  # - `append`: append the current release notes to the existing notes
+  # - `prepend`: prepend the current release notes to the existing notes
+  # - `replace`: replace existing notes
+  #
+  # Default: `keep-existing`.
+  mode: append
+
+  name_template: "v{{.Version}}"
+
+  # Upload metadata.json and artifacts.json to the release as well.
+  include_meta: true
