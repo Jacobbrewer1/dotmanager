@@ -113,6 +113,7 @@ linters:
         path: (.+)_test\.go
       - linters:
           - unused
+        path: .*
     paths:
       - third_party$
       - builtin$
