@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"go.uber.org/multierr"
+
 	"github.com/jacobbrewer1/dotmanager/pkg/utils"
 )
 
@@ -30,7 +32,7 @@ func PrintDiff(ctx context.Context) error {
 		// Find the users home directory path.
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			merr = fmt.Errorf("error getting user home directory: %w", err)
+			merr = multierr.Append(merr, fmt.Errorf("error getting user home directory: %w", err))
 			continue
 		}
 
@@ -39,7 +41,7 @@ func PrintDiff(ctx context.Context) error {
 			fmt.Println("File does not exist in home directory:", homeDotPath)
 			continue
 		} else if err != nil {
-			merr = fmt.Errorf("error stating file %s: %w", homeDotPath, err)
+			merr = multierr.Append(merr, fmt.Errorf("error stating file %s: %w", homeDotPath, err))
 			continue
 		}
 
@@ -50,7 +52,7 @@ func PrintDiff(ctx context.Context) error {
 		// Get the diff between the two files.
 		diff, err := utils.GetFileDiff(repoDot, homeDotPath)
 		if err != nil {
-			merr = fmt.Errorf("error getting diff for %s and %s: %w", repoDot, homeDotPath, err)
+			merr = multierr.Append(merr, fmt.Errorf("error getting diff for %s and %s: %w", repoDot, homeDotPath, err))
 			continue
 		}
 

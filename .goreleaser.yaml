@@ -9,9 +9,6 @@ builds:
   - id: dotmanager
     main: ./cmd
     binary: dotmanager
-    ldflags:
-      - -X main.commit={{.Commit}}
-      - -X main.date={{.Date}}
     env:
       - CGO_ENABLED=0
     goos:

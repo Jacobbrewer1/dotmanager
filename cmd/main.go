@@ -9,6 +9,7 @@ import (
 
 	"github.com/jacobbrewer1/dotmanager/cmd/add"
 	"github.com/jacobbrewer1/dotmanager/cmd/diff"
+	"github.com/jacobbrewer1/dotmanager/cmd/pull"
 	"github.com/jacobbrewer1/dotmanager/cmd/push"
 	"github.com/jacobbrewer1/dotmanager/pkg/utils"
 )
@@ -47,7 +48,7 @@ func main() {
 				Name:  "pull",
 				Usage: "Pull changes from the repository to your local dotfiles",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return push.Files(
+					return pull.Files(
 						ctx,
 					)
 				},

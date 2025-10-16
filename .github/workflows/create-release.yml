@@ -82,6 +82,7 @@ jobs:
           if [ "${{ github.event.inputs.snapshot }}" = "true" ]; then 
             args="--snapshot"
           fi
+          echo "args=$args" >> "$GITHUB_OUTPUT"
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6

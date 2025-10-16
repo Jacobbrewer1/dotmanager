@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"go.uber.org/multierr"
 
@@ -24,12 +25,7 @@ func Files(ctx context.Context) error {
 
 	var merr error
 	for _, repoDot := range commonDotFiles {
-		// Is the file in the home directory?
-		// If not, show the diff as deleted.
-		homeDotName := repoDot
-		if len(repoDot) > 4 && repoDot[:4] == "dot_" {
-			homeDotName = "." + repoDot[4:]
-		}
+		homeDotName := strings.Replace(repoDot, "dot_", ".", 1)
 
 		// Find the users home directory path.
 		homeDir, err := os.UserHomeDir()

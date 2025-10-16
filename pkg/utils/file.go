@@ -31,10 +31,18 @@ func CopyFile(src, dst string) error {
 		return fmt.Errorf("error opening source file: %w", err)
 	}
 
+	defer func() {
+		_ = srcFile.Close()
+	}()
+
 	dstFile, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY, 0o500)
 	if err != nil {
 		return fmt.Errorf("error opening destination file: %w", err)
 	}
+
+	defer func() {
+		_ = dstFile.Close()
+	}()
 
 	_, err = io.Copy(dstFile, srcFile)
 	if err != nil {
