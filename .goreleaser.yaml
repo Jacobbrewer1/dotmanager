@@ -16,7 +16,13 @@ before:
     - go generate ./...
 
 builds:
-  - env:
+  - id: dotmanager
+    main: ./cmd/dotmanager
+    binary: dotmanager
+    ldflags:
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+    env:
       - CGO_ENABLED=0
     goos:
       - linux

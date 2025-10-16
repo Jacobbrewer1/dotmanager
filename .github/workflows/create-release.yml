@@ -41,50 +41,73 @@ jobs:
           go-version: ${{ vars.GO_VERSION }}
           cache-dependency-path: "**/*.sum"
 
-      - name: Run Mage
-        uses: magefile/mage-action@v3
-        with:
-          version: latest
-          args: release
-
-      - name: Create Changelog
-        run: |
-          wget "https://github.com/clog-tool/clog-cli/releases/download/v0.9.3/clog-v0.9.3-x86_64-unknown-linux-gnu.tar.gz"
-          tar xvzf clog-v0.9.3-x86_64-unknown-linux-gnu.tar.gz
-          ./clog -c ./.clog.toml --${{ github.event.inputs.version }}
-
-      - name: Copy Changelog to Environment
-        run: |
-          echo 'CHANGELOG<<EOF' >> $GITHUB_ENV
-          cat changelog.md >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-
-      - name: Get the new version
-        id: get_version
-        run: |
-          # Get the current version through the changelog file
-          version=$(cat changelog.md | grep "###" | head -n 1 | cut -d ' ' -f 2)
-          echo "VERSION=$version" >> $GITHUB_ENV
-
-      - name: Create tag
-        uses: actions/github-script@v8
+      - name: Create Tag
+        id: tag
+        uses: actions/github-script@v6
         with:
           script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ env.VERSION }}',
-              sha: context.sha
-            })
+            const { execSync } = require('child_process');
+            
+            // Get the latest tag
+            let latestTag;
+            try {
+              latestTag = execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim();
+            } catch (error) {
+              // If no tags exist, start with v0.0.0
+              latestTag = 'v0.0.0';
+            }
+            
+            console.log(`Latest tag: ${latestTag}`);
+            
+            // Parse version numbers (remove 'v' prefix)
+            const version = latestTag.replace(/^v/, '');
+            const [major, minor, patch] = version.split('.').map(Number);
+            
+            // Determine new version based on input
+            const releaseType = '${{ github.event.inputs.version }}';
+            let newMajor = major;
+            let newMinor = minor;
+            let newPatch = patch;
+            
+            switch (releaseType) {
+              case 'major':
+                newMajor += 1;
+                newMinor = 0;
+                newPatch = 0;
+                break;
+              case 'minor':
+                newMinor += 1;
+                newPatch = 0;
+                break;
+              case 'patch':
+                newPatch += 1;
+                break;
+              default:
+                throw new Error(`Invalid release type: ${releaseType}`);
+            }
+            
+            const newTag = `v${newMajor}.${newMinor}.${newPatch}`;
+            console.log(`Creating new tag: ${newTag}`);
+            
+            // Create and push the new tag
+            execSync(`git tag ${newTag}`, { encoding: 'utf8' });
+            execSync(`git push origin ${newTag}`, { encoding: 'utf8' });
+            
+            // Set output for use in other steps
+            core.setOutput('tag', newTag);
+            core.setOutput('version', `${newMajor}.${newMinor}.${newPatch}`);
+            
+            return newTag;
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
         with:
-          name: ${{ env.VERSION }}
-          body: ${{ env.CHANGELOG }}
-          tag_name: ${{ env.VERSION }}
-          draft: false
-          prerelease: false
-          generate_release_notes: false
-          make_latest: true
-          files: "bin/*"
+          # either 'goreleaser' (default) or 'goreleaser-pro'
+          distribution: goreleaser
+          # 'latest', 'nightly', or a semver
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Your GoReleaser Pro key, if you are using the 'goreleaser-pro' distribution
+          # GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
