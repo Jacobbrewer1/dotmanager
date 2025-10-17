@@ -35,3 +35,39 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+
+release:
+  # Whether to remove an artifact that already exists.
+  #
+  # Available only for GitHub.
+  # This might be a bit expensive (rate-limiting speaking), so it is only done
+  # when the upload of an artifact fails with a 422 (which means it already
+  # exists in the release).
+  # We then grab the list of artifacts from the release, and delete the file
+  # that matches the one we're trying to upload.
+  # GoReleaser will then retry its upload.
+  replace_existing_artifacts: true
+
+  # If set to auto, will mark the release as not ready for production
+  # in case there is an indicator for this in the tag e.g. v1.0.0-rc1
+  # If set to true, will mark the release as not ready for production.
+  # Default: false.
+  prerelease: auto
+
+  make_latest: true
+
+  # What to do with the release notes in case the release already exists.
+  #
+  # Valid options are:
+  # - `keep-existing`: keep the existing notes
+  # - `append`: append the current release notes to the existing notes
+  # - `prepend`: prepend the current release notes to the existing notes
+  # - `replace`: replace existing notes
+  #
+  # Default: `keep-existing`.
+  mode: append
+
+  name_template: "v{{.Version}}"
+
+  # Upload metadata.json and artifacts.json to the release as well.
+  include_meta: true

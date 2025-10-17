@@ -48,6 +48,7 @@ jobs:
 
       - name: Create Tag
         id: tag
+        if: ${{ github.event.inputs.snapshot != 'true' }}
         run: |
           set -euo pipefail
           TYPE='${{ github.event.inputs.version }}'
