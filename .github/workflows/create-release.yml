@@ -46,8 +46,8 @@ jobs:
           go-version: ${{ vars.GO_VERSION }}
           cache-dependency-path: "**/*.sum"
 
-      - name: Create Tag
-        id: tag
+      - name: Get Next Version Tag
+        id: get-tag
         if: ${{ github.event.inputs.snapshot != 'true' }}
         run: |
           set -euo pipefail
@@ -61,26 +61,33 @@ jobs:
           VERSION=${LATEST_TAG#v}
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
           case "$TYPE" in
-            major)
-              MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
-            minor)
-              MINOR=$((MINOR+1)); PATCH=0 ;;
-            patch)
-              PATCH=$((PATCH+1)) ;;
+            major) MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR+1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH+1)) ;;
             *) echo "Invalid version bump type: $TYPE" >&2; exit 1 ;;
           esac
           NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
-          echo "New tag: $NEW_TAG"
-          # Create annotated tag and push
-          git tag -a "$NEW_TAG" -m "Release $NEW_TAG"
-          git push origin "$NEW_TAG"
+          echo "Computed new tag: $NEW_TAG"
           echo "tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+          echo "VERSION=$NEW_TAG" >> "$GITHUB_ENV"
+
+      - name: Create tag
+        uses: actions/github-script@v8
+        if: ${{ github.event.inputs.snapshot != 'true' }}
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ steps.get-tag.outputs.tag }}',
+              sha: context.sha
+            })
 
       - name: Generate Release Args
         id: release-args
         run: |
           args=""
-          if [ "${{ github.event.inputs.snapshot }}" = "true" ]; then 
+          if [ "${{ github.event.inputs.snapshot }}" = "true" ]; then
             args="--snapshot"
           fi
           echo "args=$args" >> "$GITHUB_OUTPUT"
