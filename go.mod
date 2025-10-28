@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/huh v0.7.0
 	github.com/fatih/color v1.18.0
 	github.com/pmezard/go-difflib v1.0.0
-	github.com/urfave/cli/v3 v3.4.1
+	github.com/urfave/cli/v3 v3.5.0
 	go.uber.org/multierr v1.11.0
 )
 
